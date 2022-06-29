@@ -56,3 +56,13 @@ func CreateDir(path string) bool {
 
 	return true
 }
+
+func RemoveDir(path string) bool {
+	err := os.RemoveAll(path)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return false
+	}
+
+	return true
+}
