@@ -6,11 +6,12 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "go run .",
+			"command": "go build -o codegen.exe",
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
+			},
+			"problemMatcher": []
 		},
 		{
 			"label": "test",
