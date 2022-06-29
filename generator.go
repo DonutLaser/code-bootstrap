@@ -10,11 +10,13 @@ import (
 func GenerateFromTemplate(template Template, lang string, projectName string, features []string) bool {
 	success := createDirectory(projectName)
 	if !success {
+		RemoveDir(projectName)
 		return false
 	}
 
 	success = runStatements(template.Features["default"], projectName, lang)
 	if !success {
+		RemoveDir(projectName)
 		return false
 	}
 
@@ -22,6 +24,7 @@ func GenerateFromTemplate(template Template, lang string, projectName string, fe
 		if statements, exists := template.Features[feature]; exists {
 			success = runStatements(statements, projectName, lang)
 			if !success {
+				RemoveDir(projectName)
 				return false
 			}
 		} else {
@@ -36,14 +39,17 @@ func runStatements(statements []Statement, projectName string, lang string) bool
 	for _, statement := range statements {
 		if statement.Type == STATEMENT_COMMAND {
 			commandName, commandArgs := parseCommandStatement(statement.Args[0])
+			for i := 0; i < len(commandArgs); i++ {
+				commandArgs[i] = replaceBuiltinVariables(commandArgs[i], projectName)
+			}
+
 			success := runCommand(commandName, projectName, commandArgs...)
 			if !success {
 				return false
 			}
-
 		} else if statement.Type == STATEMENT_FILE {
 			fileName, templateName := statement.Args[0], statement.Args[1]
-			success := createFile(fmt.Sprintf("%s/%s", projectName, fileName), fmt.Sprintf("./templates/%s/%s", lang, templateName))
+			success := createFile(fmt.Sprintf("%s/%s", projectName, fileName), fmt.Sprintf("./templates/%s/%s", lang, templateName), projectName)
 			if !success {
 				return false
 			}
@@ -68,7 +74,7 @@ func parseCommandStatement(str string) (name string, args []string) {
 }
 
 func runCommand(name string, cwd string, args ...string) bool {
-	fmt.Printf("Running commadn %s %s...\n", name, strings.Join(args, " "))
+	fmt.Printf("Running command %s %s...\n", name, strings.Join(args, " "))
 
 	var cmd = exec.Command(name, args...)
 	cmd.Stdout = os.Stdout
@@ -88,7 +94,9 @@ func runCommand(name string, cwd string, args ...string) bool {
 	return true
 }
 
-func createFile(name string, templateName string) bool {
+func createFile(name string, templateName string, projectName string) bool {
+	fmt.Printf("Creating a file %q\n", name)
+
 	contents := ""
 
 	if templateName != "" {
@@ -97,7 +105,7 @@ func createFile(name string, templateName string) bool {
 			return false
 		}
 
-		contents = file
+		contents = replaceBuiltinVariables(file, projectName)
 	}
 
 	success := WriteFile(name, contents)
@@ -105,5 +113,15 @@ func createFile(name string, templateName string) bool {
 }
 
 func createDirectory(name string) bool {
+	fmt.Printf("Creating a directory %q\n", name)
 	return CreateDir(name)
+}
+
+func replaceBuiltinVariables(str string, projectName string) string {
+	result := str
+	if strings.Contains(str, "{{PROJECT_NAME}}") {
+		result = strings.ReplaceAll(result, "{{PROJECT_NAME}}", projectName)
+	}
+
+	return result
 }
