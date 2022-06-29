@@ -62,7 +62,7 @@ func main() {
 			return
 		}
 
-		success = GenerateFromTemplate(template, args.Name, args.Features)
+		success = GenerateFromTemplate(template, args.Lang, args.Name, args.Features)
 		if !success {
 			return
 		}
