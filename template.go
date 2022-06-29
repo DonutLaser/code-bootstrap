@@ -31,6 +31,8 @@ func ParseTemplateFile(path string) (result Template, success bool) {
 		return Template{}, false
 	}
 
+	result.Features = make(map[string][]Statement)
+
 	activeFeature := "default"
 	result.Features[activeFeature] = []Statement{}
 
@@ -46,7 +48,7 @@ func ParseTemplateFile(path string) (result Template, success bool) {
 			continue
 		}
 
-		t, args := splitStatement(line)
+		t, args := splitStatement(strings.TrimSpace(line))
 
 		if t == string(STATEMENT_COMMAND) {
 			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_COMMAND, Args: []string{args}})
@@ -62,7 +64,7 @@ func ParseTemplateFile(path string) (result Template, success bool) {
 		} else if t == string(STATEMENT_RM) {
 			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RM, Args: []string{args}})
 		} else {
-			fmt.Printf("Unknown command %s\n at line %d\n", t, index)
+			fmt.Printf("Error: unknown command %s at line %d\n", t, index)
 			return Template{}, false
 		}
 	}
