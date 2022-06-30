@@ -49,6 +49,11 @@ func parseArgs() (result Args) {
 }
 
 func main() {
+	settings, success := GetSettings()
+	if !success {
+		return
+	}
+
 	langs, success := getSupportedLanguages()
 	if !success {
 		return
@@ -62,7 +67,7 @@ func main() {
 			return
 		}
 
-		success = GenerateFromTemplate(template, args.Lang, args.Name, args.Features)
+		success = GenerateFromTemplate(template, args.Lang, args.Name, args.Features, settings)
 		if !success {
 			return
 		}

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GenerateFromTemplate(template Template, lang string, projectName string, features []string) bool {
+func GenerateFromTemplate(template Template, lang string, projectName string, features []string, settings Settings) bool {
 	success := createDirectory(projectName)
 	if !success {
 		RemoveDir(projectName)
@@ -29,6 +29,13 @@ func GenerateFromTemplate(template Template, lang string, projectName string, fe
 			}
 		} else {
 			fmt.Printf("Warning: unknown feature %s\n", feature)
+		}
+	}
+
+	if settings.CreateVSCodeWorkspace {
+		success := WriteFile(fmt.Sprintf("%s/%s.code-workspace", settings.VSCodeWorkspaceDir, projectName), fmt.Sprintf("{ \"folders\": [{ \"path\": \"%s\" }] }", projectName))
+		if !success {
+			return false
 		}
 	}
 
