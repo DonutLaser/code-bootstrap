@@ -59,6 +59,18 @@ func runStatements(statements []Statement, projectName string, lang string) bool
 			if !success {
 				return false
 			}
+		} else if statement.Type == STATEMENT_RMFILE {
+			fileName := statement.Args[0]
+			success := RemoveFile(fmt.Sprintf("%s/%s", projectName, fileName))
+			if !success {
+				return false
+			}
+		} else if statement.Type == STATEMENT_RMDIR {
+			dirName := statement.Args[0]
+			success := RemoveDir(fmt.Sprintf("%s/%s", projectName, dirName))
+			if !success {
+				return false
+			}
 		}
 	}
 

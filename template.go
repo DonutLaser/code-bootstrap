@@ -13,7 +13,8 @@ const (
 	STATEMENT_DIR         StatementType = "DIR"
 	STATEMENT_FEATURE     StatementType = "FEAT"
 	STATEMENT_FEATURE_END StatementType = "ENDFEAT"
-	STATEMENT_RM          StatementType = "RM"
+	STATEMENT_RMFILE      StatementType = "RMFILE"
+	STATEMENT_RMDIR       StatementType = "RMDIR"
 )
 
 type Statement struct {
@@ -56,13 +57,15 @@ func ParseTemplateFile(path string) (result Template, success bool) {
 			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_DIR, Args: []string{args}})
 		} else if t == string(STATEMENT_FILE) {
 			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_FILE, Args: strings.Split(args, " ")})
+		} else if t == string(STATEMENT_RMFILE) {
+			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RMFILE, Args: []string{args}})
+		} else if t == string(STATEMENT_RMDIR) {
+			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RMDIR, Args: []string{args}})
 		} else if t == string(STATEMENT_FEATURE) {
 			activeFeature = args
 			result.Features[activeFeature] = []Statement{}
 		} else if t == string(STATEMENT_FEATURE_END) {
 			activeFeature = "default"
-		} else if t == string(STATEMENT_RM) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RM, Args: []string{args}})
 		} else {
 			fmt.Printf("Error: unknown command %s at line %d\n", t, index)
 			return Template{}, false
