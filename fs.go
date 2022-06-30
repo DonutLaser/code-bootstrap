@@ -30,6 +30,16 @@ func WriteFile(path string, content string) bool {
 	return true
 }
 
+func RemoveFile(path string) bool {
+	err := os.Remove(path)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return false
+	}
+
+	return true
+}
+
 func ReadDir(path string) ([]fs.DirEntry, bool) {
 	dir, err := os.Open(path)
 	if err != nil {
