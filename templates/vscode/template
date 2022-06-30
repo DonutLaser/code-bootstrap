@@ -1,3 +1,2 @@
-CMD yo code {{PROJECT_NAME}} -q -t=ts --pkgManager=npm --webpack --gitInit -o
-RM vsc-extension-quickstart.md
-# somehow cleanup package.json
+CMD yo code . -q -t=ts --pkgManager=npm --webpack --gitInit -o
+RMFILE vsc-extension-quickstart.md
