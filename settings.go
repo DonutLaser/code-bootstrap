@@ -11,7 +11,7 @@ type Settings struct {
 }
 
 func GetSettings() (Settings, bool) {
-	file, success := ReadFile("./settings.conf")
+	file, success := ReadFile(fmt.Sprintf("%s/settings.conf", getExecutableDir()))
 	if !success {
 		return Settings{}, false
 	}

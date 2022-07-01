@@ -26,8 +26,8 @@ type Template struct {
 	Features map[string][]Statement
 }
 
-func ParseTemplateFile(path string) (result Template, success bool) {
-	file, success := ReadFile(path)
+func ParseTemplateFile(templatePath string) (result Template, success bool) {
+	file, success := ReadFile(fmt.Sprintf("%s/%s", getExecutableDir(), templatePath))
 	if !success {
 		return Template{}, false
 	}

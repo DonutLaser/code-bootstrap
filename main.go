@@ -51,7 +51,7 @@ func printUsage() {
 }
 
 func getSupportedLanguages() (result []string, success bool) {
-	dirs, success := ReadDir("./templates")
+	dirs, success := ReadDir(fmt.Sprintf("%s/templates", getExecutableDir()))
 	if !success {
 		return []string{}, false
 	}
