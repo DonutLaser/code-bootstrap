@@ -104,6 +104,11 @@ func main() {
 	} else if args.Command == "config" {
 		runCommand("start", "", "settings.conf")
 	} else if args.Command == "help" {
+		if len(args.CommandArgs) != 1 {
+			printUsage()
+			return
+		}
+
 		command := args.CommandArgs[0]
 		fmt.Printf("%s\n", command)
 	}

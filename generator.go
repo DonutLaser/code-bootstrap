@@ -93,7 +93,7 @@ func parseCommandStatement(str string) (name string, args []string) {
 }
 
 func runCommand(name string, cwd string, args ...string) bool {
-	fmt.Printf("Running command %s %s...\n", name, strings.Join(args, " "))
+	fmt.Printf("Running command '%s %s'...\n", name, strings.Join(args, " "))
 
 	var cmd = exec.Command(name, args...)
 	cmd.Stdout = os.Stdout
