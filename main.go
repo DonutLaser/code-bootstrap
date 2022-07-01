@@ -102,7 +102,7 @@ func main() {
 	if args.Command == "generate" {
 		runGenerateCommand(args.CommandArgs, langs, settings)
 	} else if args.Command == "config" {
-		runCommand("start", "", "settings.conf")
+		OpenWithDefaultProgram("settings.conf")
 	} else if args.Command == "help" {
 		if len(args.CommandArgs) != 1 {
 			printUsage()
