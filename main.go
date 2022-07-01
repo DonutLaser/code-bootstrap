@@ -2,14 +2,52 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 )
 
 type Args struct {
-	Lang     string
-	Name     string
-	Features []string
+	Command     string
+	CommandArgs []string
+}
+
+func runGenerateCommand(args []string, langs []string, settings Settings) bool {
+	if len(args) < 2 {
+		printUsage()
+		return false
+	}
+
+	lang := args[0]
+	projectName := args[1]
+	var features []string = make([]string, 0)
+	if len(args) > 2 {
+		features = args[2:]
+	}
+
+	if IsInArray(langs, lang) {
+		template, success := ParseTemplateFile(fmt.Sprintf("./templates/%s/template", lang))
+		if !success {
+			return false
+		}
+
+		success = GenerateFromTemplate(template, lang, projectName, features, settings)
+		if !success {
+			return false
+		}
+	} else {
+		fmt.Printf("Unsupported lang %s\n", lang)
+		return false
+	}
+
+	return true
+}
+
+func printUsage() {
+	fmt.Println("Usage: <command> [arg1] [arg2] ...")
+	fmt.Println()
+	fmt.Println("Commands:")
+	fmt.Println("	generate <lang> <project-name> [feature1] [feature2] ...")
+	fmt.Println("	config")
+	fmt.Println("	help <command>")
 }
 
 func getSupportedLanguages() (result []string, success bool) {
@@ -29,23 +67,19 @@ func getSupportedLanguages() (result []string, success bool) {
 	return result, true
 }
 
-func parseArgs() (result Args) {
+func parseArgs() (result Args, success bool) {
 	args := os.Args[1:]
 
-	if len(args) < 2 {
-		log.Fatal("Usage: <lang> <project-name> [feature-name-1] [feature-name-2] ...")
+	if len(args) < 1 {
+		return Args{}, false
 	}
 
 	result = Args{
-		Lang: args[0],
-		Name: args[1],
+		Command:     args[0],
+		CommandArgs: args[1:],
 	}
 
-	if len(args) > 2 {
-		result.Features = args[2:]
-	}
-
-	return
+	return result, true
 }
 
 func main() {
@@ -59,19 +93,18 @@ func main() {
 		return
 	}
 
-	args := parseArgs()
+	args, success := parseArgs()
+	if !success {
+		printUsage()
+		return
+	}
 
-	if IsInArray(langs, args.Lang) {
-		template, success := ParseTemplateFile(fmt.Sprintf("./templates/%s/template", args.Lang))
-		if !success {
-			return
-		}
-
-		success = GenerateFromTemplate(template, args.Lang, args.Name, args.Features, settings)
-		if !success {
-			return
-		}
-	} else {
-		fmt.Println("Unsupported lang")
+	if args.Command == "generate" {
+		runGenerateCommand(args.CommandArgs, langs, settings)
+	} else if args.Command == "config" {
+		runCommand("start", "", "settings.conf")
+	} else if args.Command == "help" {
+		command := args.CommandArgs[0]
+		fmt.Printf("%s\n", command)
 	}
 }
