@@ -1,2 +1,3 @@
 @echo off
-xopy code-bootstrap.exe D:\Programos\custom"
+xcopy codegen.exe D:\Programos\custom\codegen\
+xcopy settings.conf D:\Programos\custom\codegen\
