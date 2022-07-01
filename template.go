@@ -37,7 +37,7 @@ func ParseTemplateFile(path string) (result Template, success bool) {
 	activeFeature := "default"
 	result.Features[activeFeature] = []Statement{}
 
-	lines := strings.Split(file, "\n")
+	lines := strings.Split(strings.ReplaceAll(file, "\r\n", "\n"), "\n")
 
 	for index, line := range lines {
 		if len(line) == 0 {
