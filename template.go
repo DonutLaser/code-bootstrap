@@ -12,6 +12,7 @@ const (
 	STATEMENT_FILE        StatementType = "FILE"
 	STATEMENT_DIR         StatementType = "DIR"
 	STATEMENT_FEATURE     StatementType = "FEAT"
+	STATEMENT_STANDALONE  StatementType = "STANDALONE"
 	STATEMENT_FEATURE_END StatementType = "ENDFEAT"
 	STATEMENT_RMFILE      StatementType = "RMFILE"
 	STATEMENT_RMDIR       StatementType = "RMDIR"
@@ -22,8 +23,13 @@ type Statement struct {
 	Args []string
 }
 
+type Feature struct {
+	IsStandalone bool
+	Statements   []Statement
+}
+
 type Template struct {
-	Features map[string][]Statement
+	Features map[string]Feature
 }
 
 func ParseTemplateFile(templatePath string) (result Template, success bool) {
@@ -32,10 +38,10 @@ func ParseTemplateFile(templatePath string) (result Template, success bool) {
 		return Template{}, false
 	}
 
-	result.Features = make(map[string][]Statement)
+	result.Features = make(map[string]Feature)
 
 	activeFeature := "default"
-	result.Features[activeFeature] = []Statement{}
+	result.Features[activeFeature] = Feature{}
 
 	lines := strings.Split(strings.ReplaceAll(file, "\r\n", "\n"), "\n")
 
@@ -52,22 +58,40 @@ func ParseTemplateFile(templatePath string) (result Template, success bool) {
 		t, args := splitStatement(strings.TrimSpace(line))
 
 		if t == string(STATEMENT_COMMAND) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_COMMAND, Args: []string{args}})
+			feat := result.Features[activeFeature]
+			feat.Statements = append(feat.Statements, Statement{Type: STATEMENT_COMMAND, Args: []string{args}})
+			result.Features[activeFeature] = feat
 		} else if t == string(STATEMENT_DIR) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_DIR, Args: []string{args}})
+			feat := result.Features[activeFeature]
+			feat.Statements = append(feat.Statements, Statement{Type: STATEMENT_DIR, Args: []string{args}})
+			result.Features[activeFeature] = feat
 		} else if t == string(STATEMENT_FILE) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_FILE, Args: strings.Split(args, " ")})
+			feat := result.Features[activeFeature]
+			feat.Statements = append(feat.Statements, Statement{Type: STATEMENT_FILE, Args: strings.Split(args, " ")})
+			result.Features[activeFeature] = feat
 		} else if t == string(STATEMENT_RMFILE) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RMFILE, Args: []string{args}})
+			feat := result.Features[activeFeature]
+			feat.Statements = append(feat.Statements, Statement{Type: STATEMENT_RMFILE, Args: []string{args}})
+			result.Features[activeFeature] = feat
 		} else if t == string(STATEMENT_RMDIR) {
-			result.Features[activeFeature] = append(result.Features[activeFeature], Statement{Type: STATEMENT_RMDIR, Args: []string{args}})
+			feat := result.Features[activeFeature]
+			feat.Statements = append(feat.Statements, Statement{Type: STATEMENT_RMDIR, Args: []string{args}})
+			result.Features[activeFeature] = feat
 		} else if t == string(STATEMENT_FEATURE) {
 			activeFeature = args
-			result.Features[activeFeature] = []Statement{}
 		} else if t == string(STATEMENT_FEATURE_END) {
 			activeFeature = "default"
+		} else if t == string(STATEMENT_STANDALONE) {
+			if activeFeature == "default" {
+				fmt.Printf("Error line %d: STANDALONE can only be used inside FEAT block", index)
+				return Template{}, false
+			}
+
+			feat := result.Features[activeFeature]
+			feat.IsStandalone = true
+			result.Features[activeFeature] = feat
 		} else {
-			fmt.Printf("Error: unknown command %s at line %d\n", t, index)
+			fmt.Printf("Error line %d: unknown command %s\n", index, t)
 			return Template{}, false
 		}
 	}

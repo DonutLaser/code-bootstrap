@@ -7,30 +7,45 @@ import (
 	"strings"
 )
 
-func GenerateFromTemplate(template Template, lang string, projectName string, features []string, settings Settings) bool {
-	if len(template.Features["default"]) == 0 {
-		fmt.Printf("Nothing to be done. Did you forget to specify a feature?")
-		return true
+func GenerateFromTemplate(template Template, lang string, projectName string, features []string, settings Settings) {
+	defaultStatementsExist := len(template.Features["default"].Statements) != 0
+	anyFeaturesRequested := len(features) != 0
+	standaloneFeatureCount := getRequestedStandaloneFeatureCount(features, template)
+
+	if !defaultStatementsExist {
+		if !anyFeaturesRequested {
+			fmt.Printf("Nothing to be done. Did you forget to specify a feature?\n")
+			return
+		}
+		if standaloneFeatureCount == 0 {
+			fmt.Printf("None of the features requested are standalone and there are no default commands to do.\n")
+			return
+		}
+	}
+
+	if standaloneFeatureCount > 1 {
+		fmt.Println("There can only be 1 standalone feature specified.")
+		return
 	}
 
 	success := createDirectory(projectName)
 	if !success {
 		RemoveDir(projectName)
-		return false
+		return
 	}
 
-	success = runStatements(template.Features["default"], projectName, lang)
+	success = runStatements(template.Features["default"].Statements, projectName, lang)
 	if !success {
 		RemoveDir(projectName)
-		return false
+		return
 	}
 
 	for _, feature := range features {
-		if statements, exists := template.Features[feature]; exists {
-			success = runStatements(statements, projectName, lang)
+		if feat, exists := template.Features[feature]; exists {
+			success = runStatements(feat.Statements, projectName, lang)
 			if !success {
 				RemoveDir(projectName)
-				return false
+				return
 			}
 		} else {
 			fmt.Printf("Warning: unknown feature %s\n", feature)
@@ -38,13 +53,8 @@ func GenerateFromTemplate(template Template, lang string, projectName string, fe
 	}
 
 	if settings.CreateVSCodeWorkspace {
-		success := WriteFile(fmt.Sprintf("%s/%s.code-workspace", settings.VSCodeWorkspaceDir, projectName), fmt.Sprintf("{ \"folders\": [{ \"path\": \"%s\" }] }", projectName))
-		if !success {
-			return false
-		}
+		WriteFile(fmt.Sprintf("%s/%s.code-workspace", settings.VSCodeWorkspaceDir, projectName), fmt.Sprintf("{ \"folders\": [{ \"path\": \"%s\" }] }", projectName))
 	}
-
-	return true
 }
 
 func runStatements(statements []Statement, projectName string, lang string) bool {
@@ -148,4 +158,19 @@ func replaceBuiltinVariables(str string, projectName string) string {
 	}
 
 	return result
+}
+
+func getRequestedStandaloneFeatureCount(features []string, template Template) (result int) {
+	for _, feat := range features {
+		templateFeat, exists := template.Features[feat]
+		if !exists {
+			continue
+		}
+
+		if templateFeat.IsStandalone {
+			result += 1
+		}
+	}
+
+	return
 }

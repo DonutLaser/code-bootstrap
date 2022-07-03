@@ -10,10 +10,10 @@ type Args struct {
 	CommandArgs []string
 }
 
-func runGenerateCommand(args []string, langs []string, settings Settings) bool {
+func runGenerateCommand(args []string, langs []string, settings Settings) {
 	if len(args) < 2 {
 		printUsage()
-		return false
+		return
 	}
 
 	lang := args[0]
@@ -26,19 +26,14 @@ func runGenerateCommand(args []string, langs []string, settings Settings) bool {
 	if IsInArray(langs, lang) {
 		template, success := ParseTemplateFile(fmt.Sprintf("./templates/%s/template", lang))
 		if !success {
-			return false
+			return
 		}
 
-		success = GenerateFromTemplate(template, lang, projectName, features, settings)
-		if !success {
-			return false
-		}
+		GenerateFromTemplate(template, lang, projectName, features, settings)
 	} else {
 		fmt.Printf("Unsupported lang %s\n", lang)
-		return false
+		return
 	}
-
-	return true
 }
 
 func printFeatures(args []string, langs []string) bool {
