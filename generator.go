@@ -8,6 +8,11 @@ import (
 )
 
 func GenerateFromTemplate(template Template, lang string, projectName string, features []string, settings Settings) bool {
+	if len(template.Features["default"]) == 0 {
+		fmt.Printf("Nothing to be done. Did you forget to specify a feature?")
+		return true
+	}
+
 	success := createDirectory(projectName)
 	if !success {
 		RemoveDir(projectName)
