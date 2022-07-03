@@ -41,11 +41,39 @@ func runGenerateCommand(args []string, langs []string, settings Settings) bool {
 	return true
 }
 
+func printFeatures(args []string, langs []string) bool {
+	if len(args) != 1 {
+		printUsage()
+		return false
+	}
+
+	lang := args[0]
+
+	if IsInArray(langs, lang) {
+		template, success := ParseTemplateFile(fmt.Sprintf("./templates/%s/template", lang))
+		if !success {
+			return false
+		}
+
+		for k := range template.Features {
+			if k != "default" {
+				fmt.Printf("%s\n", k)
+			}
+		}
+	} else {
+		fmt.Printf("Unsupported lang %s\n", lang)
+		return false
+	}
+
+	return true
+}
+
 func printUsage() {
 	fmt.Println("Usage: <command> [arg1] [arg2] ...")
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  generate <type> <project-name> [feature1] [feature2] ...")
+	fmt.Println("  features <type>")
 	fmt.Println("  config")
 	fmt.Println("  help <command>")
 }
@@ -121,6 +149,8 @@ func main() {
 
 	if args.Command == "generate" {
 		runGenerateCommand(args.CommandArgs, langs, settings)
+	} else if args.Command == "features" {
+		printFeatures(args.CommandArgs, langs)
 	} else if args.Command == "config" {
 		OpenWithDefaultProgram("settings.conf")
 	} else if args.Command == "help" {
