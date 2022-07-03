@@ -1,2 +1,0 @@
-CMD yo code . -q -t=ts --pkgManager=npm --webpack --gitInit -o
-RMFILE vsc-extension-quickstart.md
