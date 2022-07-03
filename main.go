@@ -45,9 +45,29 @@ func printUsage() {
 	fmt.Println("Usage: <command> [arg1] [arg2] ...")
 	fmt.Println()
 	fmt.Println("Commands:")
-	fmt.Println("	generate <lang> <project-name> [feature1] [feature2] ...")
-	fmt.Println("	config")
-	fmt.Println("	help <command>")
+	fmt.Println("  generate <type> <project-name> [feature1] [feature2] ...")
+	fmt.Println("  config")
+	fmt.Println("  help <command>")
+}
+
+func printCommandHelp(command string, langs []string) {
+	switch command {
+	case "generate":
+		fmt.Println("generate <type> <project-name> [feature1] [feature2] ...")
+		fmt.Println("Generate a project with the specified name.")
+		fmt.Println("Available project types:")
+		for _, lang := range langs {
+			fmt.Printf("  - %s\n", lang)
+		}
+	case "features":
+		fmt.Println("features <type>")
+		fmt.Println("List available features for the specified project type")
+	case "config":
+		fmt.Println("config")
+		fmt.Println("Open the configuration file in the default text editor")
+	default:
+		fmt.Printf("Unknown command %q\n", command)
+	}
 }
 
 func getSupportedLanguages() (result []string, success bool) {
@@ -110,6 +130,6 @@ func main() {
 		}
 
 		command := args.CommandArgs[0]
-		fmt.Printf("%s\n", command)
+		printCommandHelp(command, langs)
 	}
 }
