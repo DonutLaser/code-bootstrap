@@ -83,7 +83,7 @@ func ParseTemplateFile(templatePath string) (result Template, success bool) {
 			activeFeature = "default"
 		} else if t == string(STATEMENT_STANDALONE) {
 			if activeFeature == "default" {
-				fmt.Printf("Error line %d: STANDALONE can only be used inside FEAT block", index)
+				fmt.Printf("Template error (line %d): STANDALONE can only be used inside FEAT block", index+1)
 				return Template{}, false
 			}
 
@@ -91,7 +91,7 @@ func ParseTemplateFile(templatePath string) (result Template, success bool) {
 			feat.IsStandalone = true
 			result.Features[activeFeature] = feat
 		} else {
-			fmt.Printf("Error line %d: unknown command %s\n", index, t)
+			fmt.Printf("Template error (line %d): unknown command %s\n", index+1, t)
 			return Template{}, false
 		}
 	}
