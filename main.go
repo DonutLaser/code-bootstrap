@@ -74,6 +74,21 @@ func openTemplateFolder(args []string) {
 	OpenWithDefaultProgram(fmt.Sprintf("%s/templates/%s/", getExecutableDir(), lang))
 }
 
+func handleConfigCommand(args []string, settings Settings) {
+	if len(args) == 0 {
+		OpenWithDefaultProgram("settings.conf")
+		return
+	}
+
+	if args[0] != "set" || len(args) != 2 {
+		printUsage()
+		return
+	}
+
+	key, value := getKeyValue(args[1], "=")
+	UpdateSettings(settings, key, value)
+}
+
 func printUsage() {
 	fmt.Println("Usage: <command> [arg1] [arg2] ...")
 	fmt.Println()
@@ -101,8 +116,9 @@ func printCommandHelp(command string, langs []string) {
 		fmt.Println("template <type>")
 		fmt.Println("Open the template folder for the given project type in the default file explorer")
 	case "config":
-		fmt.Println("config")
-		fmt.Println("Open the configuration file in the default text editor")
+		fmt.Println("config [set <config_key=config_value>]")
+		fmt.Println("Open the configuration file in the default text editor.")
+		fmt.Println("[set <config_key=config_value>] allows you to quickly set a config option without editing the file manually.")
 	default:
 		fmt.Printf("Unknown command %q\n", command)
 	}
@@ -164,7 +180,7 @@ func main() {
 	} else if args.Command == "template" {
 		openTemplateFolder(args.CommandArgs)
 	} else if args.Command == "config" {
-		OpenWithDefaultProgram("settings.conf")
+		handleConfigCommand(args.CommandArgs, settings)
 	} else if args.Command == "help" {
 		if len(args.CommandArgs) != 1 {
 			printUsage()
