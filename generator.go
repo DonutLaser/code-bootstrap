@@ -71,7 +71,7 @@ func runStatements(statements []Statement, projectName string, lang string) bool
 			}
 		} else if statement.Type == STATEMENT_FILE {
 			fileName, templateName := statement.Args[0], statement.Args[1]
-			success := createFile(fmt.Sprintf("%s/%s", projectName, fileName), fmt.Sprintf("./templates/%s/%s", lang, templateName), projectName)
+			success := createFile(fmt.Sprintf("%s/%s", projectName, fileName), fmt.Sprintf("%s/templates/%s/%s", getExecutableDir(), lang, templateName), projectName)
 			if !success {
 				return false
 			}
