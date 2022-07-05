@@ -63,12 +63,24 @@ func printFeatures(args []string, langs []string) bool {
 	return true
 }
 
+func openTemplateFolder(args []string) {
+	if len(args) != 1 {
+		printUsage()
+		return
+	}
+
+	lang := args[0]
+
+	OpenWithDefaultProgram(fmt.Sprintf("%s/templates/%s/", getExecutableDir(), lang))
+}
+
 func printUsage() {
 	fmt.Println("Usage: <command> [arg1] [arg2] ...")
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  generate <type> <project-name> [feature1] [feature2] ...")
 	fmt.Println("  features <type>")
+	fmt.Println("  template <type>")
 	fmt.Println("  config")
 	fmt.Println("  help <command>")
 }
@@ -85,6 +97,9 @@ func printCommandHelp(command string, langs []string) {
 	case "features":
 		fmt.Println("features <type>")
 		fmt.Println("List available features for the specified project type")
+	case "template":
+		fmt.Println("template <type>")
+		fmt.Println("Open the template folder for the given project type in the default file explorer")
 	case "config":
 		fmt.Println("config")
 		fmt.Println("Open the configuration file in the default text editor")
@@ -146,6 +161,8 @@ func main() {
 		runGenerateCommand(args.CommandArgs, langs, settings)
 	} else if args.Command == "features" {
 		printFeatures(args.CommandArgs, langs)
+	} else if args.Command == "template" {
+		openTemplateFolder(args.CommandArgs)
 	} else if args.Command == "config" {
 		OpenWithDefaultProgram("settings.conf")
 	} else if args.Command == "help" {
